@@ -5,22 +5,23 @@ interface RetryOptions {
 }
 
 export const retryPromise = (
-  // deno-lint-ignore no-explicit-any
-  callback: () => Promise<any>,
+  callback: () => Promise<unknown>,
   options: Partial<RetryOptions> = {}
 ) =>
   new Promise((resolve, reject) => {
     const { onError, maxAttempts = 3, timeout = 3000 } = options;
     let attempts = 1;
-    const makeAttempt = () =>
+    const makeAttempt = () => {
       callback()
         .then((result) => resolve(result))
-        .catch((err) => {
-          onError?.(err, { attempts });
+        .catch(async (err) => {
+          await onError?.(err, { attempts });
           attempts++;
           if (attempts > maxAttempts) reject(err);
           else setTimeout(makeAttempt, timeout);
-        });
+        })
+        .catch((err) => reject(err));
+    };
 
     makeAttempt();
   });

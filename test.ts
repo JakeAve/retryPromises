@@ -2,6 +2,7 @@ import {
   assert,
   assertArrayIncludes,
   assertEquals,
+  assertRejects,
 } from "https://deno.land/std@0.157.0/testing/asserts.ts";
 import { retryPromise } from "./mod.ts";
 
@@ -53,7 +54,7 @@ Deno.test("Attempts option works", async () => {
   try {
     await retryPromise(rejectyPromise, {
       timeout: 100,
-      onError: () => {
+      onError: (_err) => {
         attemptNumbers.push("");
       },
       maxAttempts: 4,
@@ -76,4 +77,16 @@ Deno.test("Timeout option works", async () => {
     const diff = Date.now() - start;
     assert(diff < 400);
   }
+});
+Deno.test("Able to abort retries", async () => {
+  await assertRejects(
+    () =>
+      retryPromise(rejectyPromise, {
+        onError: () => {
+          throw new Error("foo");
+        },
+      }),
+    Error,
+    "foo"
+  );
 });
