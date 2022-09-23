@@ -15,7 +15,7 @@ Retries a promise and returns the result when successful or throws an error when
 try {
   await retryPromise(makeACallToAnApi, {
     onError: (errFromCallback, { attempts }) => {
-      console.error(err);
+      console.error(errFromCallback);
       if (attempts < 4) {
         console.log("retrying");
       }
