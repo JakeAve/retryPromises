@@ -1,5 +1,14 @@
 interface RetryOptions {
-  onError: (error: Error, { attempts }: { attempts: number }) => void;
+  onError: (
+    error: Error,
+    {
+      attempts,
+      maxAttempts,
+    }: {
+      attempts: number;
+      maxAttempts: number;
+    }
+  ) => void | Promise<void>;
   maxAttempts: number;
   timeout: number;
 }
@@ -15,7 +24,7 @@ export const retryPromise = (
       callback()
         .then((result) => resolve(result))
         .catch(async (err) => {
-          await onError?.(err, { attempts });
+          await onError?.(err, { attempts, maxAttempts });
           attempts++;
           if (attempts > maxAttempts) reject(err);
           else setTimeout(makeAttempt, timeout);

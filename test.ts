@@ -75,7 +75,8 @@ Deno.test("Timeout option works", async () => {
     });
   } catch {
     const diff = Date.now() - start;
-    assert(diff < 400);
+    assert(diff < 3000);
+    assert(diff > 30);
   }
 });
 Deno.test("Able to abort retries", async () => {
